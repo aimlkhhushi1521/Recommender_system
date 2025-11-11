@@ -1,0 +1,65 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Hybrid SDG Recommender</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #f7faf7; color: #1f2937; }
+        .card { background: white; padding: 18px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); max-width: 900px; margin-bottom: 20px; }
+        h1 { color: #047857; }
+        label { display:block; margin-top:8px; }
+        select,input { padding:8px; width:100%; max-width:300px; margin-top:4px; }
+        button { padding:10px 14px; background:#047857; color:white; border:none; border-radius:6px; cursor:pointer; margin-top:10px;}
+        table { width:100%; border-collapse: collapse; margin-top:10px; }
+        th,td { border: 1px solid #e6e6e6; padding: 8px; text-align:left; }
+        th { background:#e6f4ef; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🌍 Hybrid SDG Recommender</h1>
+        <form method="post" action="/recommend">
+            <label>User ID</label>
+            <input type="number" name="user_id" required>
+
+            <label>Method</label>
+            <select name="method">
+                <option value="hybrid">Hybrid (content + collaborative)</option>
+                <option value="collab">Collaborative (SVD)</option>
+                <option value="content">Content-based (by item)</option>
+            </select>
+
+            <label>When using Content-based: pick an item</label>
+            <select name="content_id">
+                {% for it in items %}
+                <option value="{{ it.content_id }}">{{ it.title }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Top N</label>
+            <input type="number" name="top_n" value="10" min="1" max="50">
+
+            <button type="submit">Get Recommendations</button>
+        </form>
+    </div>
+
+    {% if recs %}
+    <div class="card">
+        <h2>Recommendations</h2>
+        <table>
+            <thead><tr><th>Content ID</th><th>Title</th><th>Score/Pred</th></tr></thead>
+            <tbody>
+            {% for r in recs %}
+                <tr>
+                    <td>{{ r.content_id if r.content_id is defined else r.content_id }}</td>
+                    <td>{{ r.title }}</td>
+                    <td>{{ (r.hybrid_score if r.hybrid_score is defined else (r.pred_rating if r.pred_rating is defined else '')) | round(3) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</body>
+</html>
